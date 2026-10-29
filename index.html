@@ -1,0 +1,898 @@
+<title>번개 히어로 키우기</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Jua&family=Gowun+Dodum&display=swap">
+<style>
+/* Layout: 1600×900(16:9) 무대 하나를 창 크기에 맞춰 통째로 확대·축소 — 왼쪽 히어로 칸, 오른쪽 문제 칸, 위쪽 진행 막대. 밝은 하늘 + 스티커 만화풍. */
+:root{
+  --page:#3b5bdb;
+  --sky-1:#aee3ff;
+  --sky-2:#e9f8ff;
+  --ink:#2d3561;
+  --muted:#6b74a3;
+  --card:#ffffff;
+  --soft:#f2f6ff;
+  --sun:#ffd93b;
+  --sun-d:#e0a800;
+  --coral:#ff6b6b;
+  --mint:#20bfae;
+  --grape:#9b7bff;
+  --leaf:#4fbf4f;
+  --blue:#3fa2ff;
+  --font-display:"Jua","Malgun Gothic","Apple SD Gothic Neo",sans-serif;
+  --font-body:"Gowun Dodum","Malgun Gothic","Apple SD Gothic Neo",sans-serif;
+  color-scheme:light;
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0;background:var(--page);color:var(--ink);font-family:var(--font-body);overflow:hidden;
+  background-image:radial-gradient(rgba(255,255,255,.14) 2px, transparent 2.5px);background-size:28px 28px;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));
+  display:grid;place-items:center;
+}
+[hidden]{display:none!important}
+button{font-family:inherit;color:inherit}
+:focus-visible{outline:5px solid var(--coral);outline-offset:3px}
+
+#viewport{position:relative;overflow:hidden;width:320px;height:180px}
+#stage{
+  position:absolute;left:0;top:0;width:1600px;height:900px;transform-origin:0 0;
+  border-radius:44px;overflow:hidden;border:8px solid var(--ink);
+  background:linear-gradient(180deg,var(--sky-1) 0%,var(--sky-2) 62%,#fff8d6 100%);
+  box-shadow:0 18px 0 rgba(20,30,90,.35);
+}
+/* 구름·번개 장식 */
+.cloud{position:absolute;background:#fff;border-radius:999px;opacity:.9}
+.cloud::before,.cloud::after{content:"";position:absolute;background:#fff;border-radius:50%}
+.cloud::before{width:55%;height:150%;left:15%;bottom:20%}
+.cloud::after{width:40%;height:120%;right:12%;bottom:30%}
+.c1{width:190px;height:50px;left:560px;top:850px}
+.c2{width:150px;height:40px;left:1380px;top:845px}
+.c3{width:120px;height:32px;left:20px;top:850px}
+.deco-bolt{position:absolute;width:46px;opacity:.85;animation:bob 3s ease-in-out infinite}
+
+/* 위쪽 막대 */
+.bar{position:absolute;left:32px;right:32px;top:22px;height:80px;display:flex;align-items:center;gap:22px}
+.logo{display:flex;align-items:center;gap:12px;background:var(--sun);border:5px solid var(--ink);border-radius:26px;padding:6px 22px 6px 12px;box-shadow:0 6px 0 var(--ink)}
+.logo svg{width:44px;height:44px}
+.logo h1{margin:0;font-family:var(--font-display);font-weight:400;font-size:38px;letter-spacing:1px}
+.unit{font-family:var(--font-display);font-size:21px;background:#fff;border:4px solid var(--ink);border-radius:999px;padding:6px 16px;white-space:nowrap}
+.prog{flex:1;display:flex;align-items:center;gap:12px;min-width:0}
+.track{flex:1;height:30px;background:#fff;border:4px solid var(--ink);border-radius:999px;overflow:hidden;position:relative}
+.track i{position:absolute;left:0;top:0;bottom:0;background:repeating-linear-gradient(-45deg,var(--sun) 0 16px,#ffe98a 16px 32px);border-right:4px solid var(--ink);transition:width .5s}
+.prog b{font-family:var(--font-display);font-weight:400;font-size:28px;white-space:nowrap;font-variant-numeric:tabular-nums}
+.tbtn{font-family:var(--font-display);font-size:20px;background:#fff;border:4px solid var(--ink);border-radius:18px;padding:8px 16px;cursor:pointer;box-shadow:0 5px 0 var(--ink);white-space:nowrap}
+.tbtn:active{transform:translateY(4px);box-shadow:0 1px 0 var(--ink)}
+
+/* 왼쪽: 히어로 */
+.left{position:absolute;left:32px;top:124px;width:500px;height:736px;background:var(--card);border:6px solid var(--ink);border-radius:36px;box-shadow:0 10px 0 var(--ink);padding:18px 24px;display:flex;flex-direction:column;gap:10px}
+.hero-box{position:relative;height:360px;border-radius:26px;background:radial-gradient(circle at 50% 55%,#fff6c9 0 38%,#ffe27a 39% 40%,var(--soft) 41%);border:4px dashed #c9d4ff;display:grid;place-items:center;overflow:hidden}
+.hero-box .h{width:270px;height:338px}
+.hero-box svg,.ov-hero svg,.dex svg{width:100%;height:100%;display:block}
+.lvl{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.lvl-name{font-family:var(--font-display);font-size:30px;line-height:1.15}
+.lvl-num{font-family:var(--font-display);font-size:30px;background:var(--coral);color:#fff;border:4px solid var(--ink);border-radius:16px;padding:0 14px;white-space:nowrap}
+.lvl-desc{margin:0;font-size:19px;color:var(--muted);line-height:1.4;min-height:54px}
+.meter{display:flex;align-items:center;gap:12px}
+.meter span{font-family:var(--font-display);font-size:20px;white-space:nowrap}
+.cells{flex:1;display:grid;grid-template-columns:repeat(5,1fr);gap:6px;padding:6px;border:4px solid var(--ink);border-radius:14px;background:#fff;position:relative}
+.cells::after{content:"";position:absolute;right:-14px;top:50%;width:10px;height:22px;margin-top:-11px;background:var(--ink);border-radius:0 6px 6px 0}
+.cell{height:26px;border-radius:7px;background:#e6ebff}
+.cell.on{background:var(--leaf);box-shadow:inset 0 -5px 0 rgba(0,0,0,.15)}
+.cell.pop{animation:pop .45s}
+.meter em{font-style:normal;font-family:var(--font-display);font-size:22px;min-width:64px;text-align:right;font-variant-numeric:tabular-nums}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.stat{border:4px solid var(--ink);border-radius:18px;padding:4px 6px;text-align:center}
+.stat:nth-child(1){background:#e3f9e3}.stat:nth-child(2){background:#e3f1ff}.stat:nth-child(3){background:#ffe6e6}
+.stat b{display:block;font-family:var(--font-display);font-weight:400;font-size:32px;line-height:1.2;font-variant-numeric:tabular-nums}
+.stat span{font-size:16px;font-weight:700}
+.dex{display:grid;grid-template-columns:repeat(9,1fr);gap:5px;margin-top:auto}
+.dex div{aspect-ratio:240/300;border-radius:10px;background:var(--soft);border:3px solid #c9d4ff;overflow:hidden}
+.dex div.locked svg{filter:brightness(0) opacity(.22)}
+.dex div.now{border-color:var(--coral);background:#fff2c2}
+
+/* 오른쪽: 문제 */
+.card{position:absolute;left:560px;top:124px;width:1008px;height:736px;background:var(--card);border:6px solid var(--ink);border-radius:36px;box-shadow:0 10px 0 var(--ink);padding:30px 40px;overflow:hidden;display:flex;flex-direction:column}
+.meta{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.chip{font-family:var(--font-display);font-size:21px;padding:3px 16px;border-radius:999px;border:4px solid var(--ink);color:#fff}
+.chip.t-보충{background:var(--leaf)} .chip.t-기본{background:var(--blue)} .chip.t-심화{background:var(--grape)}
+.chip.lab{background:var(--mint)}
+.chip.retry{background:var(--coral)}
+.src{margin-left:auto;font-size:18px;color:var(--muted);font-weight:700}
+.qno{font-family:var(--font-display);font-size:24px;color:var(--coral);margin:12px 0 2px}
+.qtext{font-family:var(--font-display);font-size:34px;line-height:1.4;margin:0 0 16px;text-wrap:pretty;word-break:keep-all}
+.box{border:4px dashed var(--sun-d);background:#fff9dc;border-radius:22px;padding:14px 20px;margin:0 0 16px;font-size:26px;line-height:1.5;font-family:var(--font-display);word-break:keep-all}
+.box p{margin:0}
+.box .blank{display:inline-block;min-width:3.2em;border-bottom:5px solid var(--coral);text-align:center;color:var(--coral)}
+.fig{margin:0 0 16px;display:flex;justify-content:center}
+.fig svg{max-width:100%;height:auto;max-height:190px}
+.tbl{margin:0 0 16px}
+.tbl table{border-collapse:separate;border-spacing:0;width:100%;font-family:var(--font-display);font-size:24px;border:4px solid var(--ink);border-radius:18px;overflow:hidden}
+.tbl th,.tbl td{padding:10px 14px;text-align:center}
+.tbl th{background:#e3f1ff;border-bottom:4px solid var(--ink)}
+.tbl th+th,.tbl td+td{border-left:4px solid var(--ink)}
+.opts{display:grid;gap:14px;grid-template-columns:1fr}
+.opts.two{grid-template-columns:1fr 1fr}
+.opts.four{grid-template-columns:repeat(4,1fr)}
+.opt{display:flex;align-items:center;gap:14px;text-align:left;width:100%;background:#fff;border:5px solid var(--ink);border-radius:22px;padding:12px 18px;font-family:var(--font-display);font-size:26px;line-height:1.35;cursor:pointer;box-shadow:0 6px 0 var(--ink);transition:transform .08s, background .15s;word-break:keep-all}
+.opt:hover:not(:disabled){background:#fff6cf;transform:translateY(-3px);box-shadow:0 9px 0 var(--ink)}
+.opt:active:not(:disabled){transform:translateY(5px);box-shadow:0 1px 0 var(--ink)}
+.opt .k{flex:none;width:44px;height:44px;border-radius:50%;background:var(--sun);border:4px solid var(--ink);display:grid;place-items:center;font-size:22px}
+.opt:disabled{cursor:default}
+.opt.right{background:#d9f7d9}
+.opt.right .k{background:var(--leaf);color:#fff}
+.opt.wrong{background:#ffe0e0}
+.opt.wrong .k{background:var(--coral);color:#fff}
+.short{display:flex;gap:14px}
+.short input{flex:1;min-width:0;font-family:var(--font-display);font-size:34px;padding:12px 22px;border-radius:22px;border:5px solid var(--ink);background:#fffdf0;color:var(--ink)}
+.short input:focus{outline:none;background:#fff6cf}
+.go{font-family:var(--font-display);font-size:30px;background:var(--coral);color:#fff;border:5px solid var(--ink);border-radius:22px;padding:10px 30px;cursor:pointer;box-shadow:0 7px 0 var(--ink)}
+.go:active{transform:translateY(5px);box-shadow:0 2px 0 var(--ink)}
+.go.sun{background:var(--sun);color:var(--ink)}
+.hint{font-size:18px;color:var(--muted);margin:14px 0 0}
+
+/* 정답/오답 말풍선 */
+.fb{position:absolute;left:24px;right:24px;bottom:22px;border:6px solid var(--ink);border-radius:30px;padding:18px 26px;display:flex;gap:20px;align-items:center;animation:slideUp .35s cubic-bezier(.2,.9,.3,1.3)}
+.fb.ok{background:#e4fbe4}
+.fb.no{background:#ffecec}
+.fb .face{flex:none;width:96px;height:96px;border-radius:50%;border:5px solid var(--ink);display:grid;place-items:center;font-family:var(--font-display);font-size:44px;color:#fff}
+.fb.ok .face{background:var(--leaf)} .fb.no .face{background:var(--coral)}
+.fb .txt{flex:1;min-width:0}
+.fb h3{margin:0;font-family:var(--font-display);font-weight:400;font-size:38px;line-height:1.1}
+.fb.ok h3{color:#2e9a2e} .fb.no h3{color:#e04848}
+.fb .ans{margin:4px 0 0;font-family:var(--font-display);font-size:24px}
+.fb .exp{margin:6px 0 0;font-size:19px;line-height:1.45;color:#3d4670;font-weight:700}
+.fb .again{margin:6px 0 0;font-family:var(--font-display);font-size:20px;color:#e04848}
+.fb .go{flex:none}
+
+/* 시작/끝 화면 */
+.intro{display:flex;flex-direction:column;height:100%}
+.intro h2{font-family:var(--font-display);font-weight:400;font-size:52px;margin:0 0 6px;line-height:1.2}
+.intro h2 span{color:var(--coral)}
+.intro p{font-size:24px;line-height:1.55;margin:0 0 18px;font-weight:700;color:#3d4670;word-break:keep-all}
+.rules{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin:0 0 20px}
+.rule{border:5px solid var(--ink);border-radius:26px;padding:16px 18px;box-shadow:0 6px 0 var(--ink)}
+.rule:nth-child(1){background:#fff6cf}.rule:nth-child(2){background:#ffe6e6}.rule:nth-child(3){background:#e3f1ff}
+.rule b{display:block;font-family:var(--font-display);font-weight:400;font-size:28px;margin-bottom:4px}
+.rule span{font-size:19px;font-weight:700;line-height:1.4;color:#3d4670}
+.tiers{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:auto}
+.btns{display:flex;gap:16px;align-items:center}
+
+/* 레벨업 오버레이 (무대 안) */
+.overlay{position:absolute;inset:0;z-index:20;background:rgba(45,53,97,.72);display:grid;place-items:center}
+.ov-panel{position:relative;width:760px;height:800px;background:#fffdf2;border:8px solid var(--ink);border-radius:48px;box-shadow:0 14px 0 var(--ink);display:flex;flex-direction:column;align-items:center;justify-content:flex-end;padding:30px;overflow:hidden}
+.burst{position:absolute;left:50%;top:280px;width:1200px;height:1200px;margin:-600px 0 0 -600px;border-radius:50%;
+  background:repeating-conic-gradient(#ffe27a 0 10deg,#fff6c9 10deg 20deg);animation:spin 18s linear infinite}
+.ov-hero{position:relative;width:340px;height:425px;margin-bottom:auto;margin-top:10px}
+.ov-tag{position:relative;margin:0;font-family:var(--font-display);font-size:84px;line-height:1;color:var(--sun);
+  -webkit-text-stroke:6px var(--ink);paint-order:stroke fill;text-shadow:0 8px 0 var(--ink)}
+.ov-name{position:relative;margin:14px 0 4px;font-family:var(--font-display);font-size:36px;background:#fff;border:5px solid var(--ink);border-radius:999px;padding:4px 26px}
+.ov-desc{position:relative;margin:8px 0 18px;font-size:22px;font-weight:700;text-align:center;line-height:1.45;color:#3d4670;word-break:keep-all}
+.ov-desc b{color:var(--coral)}
+.ov-btns{position:relative;display:flex;gap:16px}
+.flash{position:absolute;inset:0;background:#fff;pointer-events:none;z-index:30;opacity:0}
+.zap{position:absolute;inset:0;pointer-events:none;z-index:25}
+.zap path{fill:var(--sun);stroke:var(--ink);stroke-width:6;stroke-linejoin:round;opacity:0}
+.confetti{position:absolute;inset:0;pointer-events:none;z-index:26;overflow:hidden}
+.confetti i{position:absolute;top:-30px;width:16px;height:24px;border-radius:4px;animation:fall linear forwards}
+
+@keyframes bob{0%,100%{transform:translateY(0) rotate(-6deg)}50%{transform:translateY(-10px) rotate(6deg)}}
+@keyframes pop{0%{transform:scale(1)}40%{transform:scale(1.35)}100%{transform:scale(1)}}
+@keyframes slideUp{from{transform:translateY(120%)}to{transform:none}}
+@keyframes flash{0%{opacity:.95}100%{opacity:0}}
+@keyframes heroIn{0%{transform:scale(.4) rotate(-12deg)}55%{transform:scale(1.15) rotate(4deg)}75%{transform:scale(.95)}100%{transform:scale(1)}}
+@keyframes zap{0%,100%{opacity:0}8%,26%{opacity:1}16%{opacity:.25}}
+@keyframes tagIn{0%{transform:scale(0) rotate(-10deg)}70%{transform:scale(1.2) rotate(3deg)}100%{transform:none}}
+@keyframes floaty{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes pulse{0%,100%{opacity:.55}50%{opacity:1}}
+@keyframes shake{0%,100%{transform:none}20%{transform:translateX(-12px)}40%{transform:translateX(12px)}60%{transform:translateX(-8px)}80%{transform:translateX(8px)}}
+@keyframes hop{0%,100%{transform:translateY(0)}30%{transform:translateY(-26px)}55%{transform:translateY(0)}70%{transform:translateY(-10px)}}
+@keyframes fall{to{transform:translateY(960px) rotate(720deg)}}
+.flash.go-fx{animation:flash .6s ease-out}
+.ov-hero.go-fx{animation:heroIn .9s cubic-bezier(.2,.9,.3,1.2)}
+.zap.go-fx path{animation:zap 1.2s ease-out}
+.zap.go-fx path:nth-child(2){animation-delay:.12s}
+.zap.go-fx path:nth-child(3){animation-delay:.24s}
+.zap.go-fx path:nth-child(4){animation-delay:.36s}
+.ov-tag.go-fx{animation:tagIn .55s .3s both}
+.hero-float{animation:floaty 2.4s ease-in-out infinite}
+.aura-spin{transform-origin:120px 150px;animation:spin 14s linear infinite}
+.glow-pulse{animation:pulse 1.6s ease-in-out infinite}
+.card.shake{animation:shake .4s}
+.hero-box .h.hop{animation:hop .6s}
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{animation:none!important;transition:none!important}
+}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+</style>
+
+<div id="viewport">
+<div id="stage">
+  <div class="cloud c1"></div><div class="cloud c2"></div><div class="cloud c3"></div>
+
+  <header class="bar">
+    <div class="logo">
+      <svg viewBox="0 0 48 48" aria-hidden="true"><polygon points="28,2 8,28 22,28 16,46 40,18 26,18 32,2" fill="#fff" stroke="#2d3561" stroke-width="4" stroke-linejoin="round"/></svg>
+      <h1>번개 히어로 키우기</h1>
+    </div>
+    <span class="unit">6-2 · 3. 전기의 이용</span>
+    <div class="prog" aria-label="진행도"><div class="track"><i id="progFill" style="width:0"></i></div><b id="progTxt">0 / 40</b></div>
+    <button class="tbtn" id="soundBtn" type="button" aria-pressed="true">소리 켬</button>
+    <button class="tbtn" id="resetBtn" type="button">처음부터</button>
+  </header>
+
+  <aside class="left" aria-label="내 히어로">
+    <div class="hero-box"><div class="h" id="heroImg"></div></div>
+    <div class="lvl"><span class="lvl-name" id="lvlName"></span><span class="lvl-num" id="lvlNum"></span></div>
+    <p class="lvl-desc" id="lvlDesc"></p>
+    <div class="meter"><span>충전</span><div class="cells" id="cells"></div><em id="meterTxt"></em></div>
+    <div class="stats">
+      <div class="stat"><b id="sCorrect">0</b><span>맞힌 문제</span></div>
+      <div class="stat"><b id="sLeft">40</b><span>남은 문제</span></div>
+      <div class="stat"><b id="sRetry">0</b><span>다시 풀 문제</span></div>
+    </div>
+    <div class="dex" id="dex" aria-label="진화 도감"></div>
+  </aside>
+
+  <main class="card" id="card" aria-live="polite"></main>
+
+  <div class="overlay" id="overlay" hidden>
+    <div class="ov-panel">
+      <div class="burst" aria-hidden="true"></div>
+      <div class="ov-hero" id="ovHero"></div>
+      <p class="ov-tag" id="ovTag">레벨 업!</p>
+      <p class="ov-name" id="ovName"></p>
+      <p class="ov-desc" id="ovDesc"></p>
+      <div class="ov-btns" id="ovBtns"></div>
+    </div>
+  </div>
+  <svg class="zap" id="zap" viewBox="0 0 1600 900" aria-hidden="true">
+    <path d="M150 0 L240 0 L190 170 L260 170 L120 420 L160 230 L90 230 Z"/>
+    <path d="M1450 0 L1540 0 L1490 170 L1560 170 L1420 420 L1460 230 L1390 230 Z"/>
+    <path d="M330 900 L400 650 L340 650 L460 470 L430 640 L500 640 L420 900 Z"/>
+    <path d="M1270 900 L1200 650 L1260 650 L1140 470 L1170 640 L1100 640 L1180 900 Z"/>
+  </svg>
+  <div class="confetti" id="confetti"></div>
+  <div class="flash" id="flash"></div>
+</div>
+</div>
+
+<script>
+/* ---------- 문제: 미래엔 과학 6-2 3. 전기의 이용 단원평가(보충·기본·심화) 원문에서 단답형·선택형만 골라 옮김 ---------- */
+const Q = [
+/* ===== 보충 ===== */
+{t:"보충",src:"보충 1회 1번",type:"short",
+ q:"전지, 전구, 전선 등 여러 가지 전기 부품을 연결한 것을 무엇이라고 하는지 써 봅시다.",
+ ans:["전기 회로","전기회로"],
+ exp:"전지, 전구, 전선 등 여러 가지 전기 부품을 연결한 것을 전기 회로라고 한다."},
+{t:"보충",src:"보충 3회 2번",type:"mc",
+ q:"전기 회로에 연결한 전구에 대한 설명으로 옳은 것을 골라 봅시다.",
+ opts:["전기가 흐르면 빛을 낸다.","전기 회로에 전기가 흐르도록 에너지를 공급해 준다."],ans:0,
+ exp:"전구는 전기 회로에 전기가 흐르면 빛을 낸다. (에너지를 공급해 주는 것은 전지이다.)"},
+{t:"보충",src:"보충 2회 1번",type:"mc",lab:true,
+ q:"(  ) 안에 들어갈 알맞은 말을 골라 봅시다.",
+ box:"전기 회로에서 전지와 전구의 <span class='blank'>?</span> 끝부분을 전선으로 끊어지지 않게 연결해 전기가 흐르면 전구에 불이 켜진다.",
+ opts:["한쪽","양쪽"],ans:1,
+ exp:"전기 회로에서 전지와 전구의 양쪽 끝부분을 전선으로 끊어지지 않게 연결해 전기가 흐르면 전구에 불이 켜진다."},
+{t:"보충",src:"보충 4회 2번",type:"mc",lab:true,
+ q:"전기 회로에 나무젓가락을 연결한 뒤 스위치를 닫았더니 전구에 불이 켜지지 않았습니다. 이를 보고 알 수 있는 사실로 옳은 것을 골라 봅시다.",
+ opts:["나무는 도체이다.","나무젓가락은 전기가 잘 흐르지 않는 물질로 이루어져 있다."],ans:1,
+ exp:"나무는 부도체이므로 나무젓가락을 전기 회로에 연결하면 전구에 불이 켜지지 않는다."},
+{t:"보충",src:"보충 5회 2번",type:"mc",lab:true,
+ q:"전기 회로에 알루미늄 포일을 연결하고 스위치를 닫았을 때 전구에 불이 켜졌습니다. 알루미늄 포일 대신 연결했을 때 전구에 불이 켜지지 않는 물체를 골라 봅시다.",
+ opts:["㉠ 쇠못","㉡ 철 클립","㉢ 종이 빨대","㉣ 가위의 날 부분"],ans:2,
+ exp:"철로 만들어진 물체인 쇠못, 철 클립, 가위의 날 부분을 알루미늄 포일 대신 연결하면 전구에 불이 켜진다. 종이 빨대는 전기가 잘 흐르지 않는다."},
+{t:"보충",src:"보충 4회 3번",type:"mc",
+ q:"가위에서 ㉠ 날 부분과 ㉡ 손잡이 부분 중 도체인 부분을 골라 봅시다.",
+ fig:"scissors",
+ opts:["㉠ 날 부분","㉡ 손잡이 부분"],ans:0,
+ exp:"㉠은 철로 만들어졌으므로 도체이고, ㉡은 플라스틱으로 만들어졌으므로 부도체이다."},
+{t:"보충",src:"보충 5회 4번",type:"mc",lab:true,
+ q:"전기 회로에 전지 1 개를 추가하여 전지 2 개를 직렬연결했을 때 나타나는 현상으로 옳은 것을 골라 봅시다.",
+ opts:["㉠ 전구의 밝기가 어두워진다.","㉡ 전구의 밝기가 더 밝아진다.","㉢ 전구에 불이 켜지지 않는다."],ans:1,
+ exp:"전기 회로에 직렬연결한 전지의 개수에 따라 전구의 밝기가 달라진다. 전지 2 개를 직렬연결하면 전지 1 개를 연결할 때보다 전구의 밝기가 더 밝다."},
+{t:"보충",src:"보충 4회 4번",type:"mc",lab:true,fig:"bulbs",
+ q:"전지 1 개를 연결한 전기 회로와 전지 2 개를 직렬연결한 전기 회로의 스위치를 닫았을 때 전구의 밝기를 비교한 실험입니다. 이 실험에서 다르게 한 조건을 골라 봅시다.",
+ opts:["㉠ 전지의 개수","㉡ 전선의 개수"],ans:0,
+ exp:"전기 회로에 연결한 전지의 수에 따라 전구의 밝기가 다르므로, 다르게 한 조건은 전지의 수이다."},
+{t:"보충",src:"보충 4회 5번",type:"mc",lab:true,
+ q:"전지 2 개를 직렬연결한 전기 회로의 스위치를 닫으면 전동기 날개가 돌아갑니다. 이 전기 회로에서 전지 1 개를 빼고 전지 1 개만 연결한 뒤 스위치를 닫았을 때의 변화로 옳은 것을 골라 봅시다.",
+ opts:["전동기 날개가 천천히 돌아간다.","전동기 날개가 더 빠르게 돌아간다."],ans:0,
+ exp:"전기 회로에 전지 2 개를 직렬연결하면 전지 1 개를 연결할 때보다 전동기 날개가 더 빠르게 돌아간다. 그러므로 전지를 1 개로 줄이면 더 천천히 돌아간다."},
+{t:"보충",src:"보충 5회 5번",type:"mc",lab:true,
+ q:"전지 1 개를 연결한 전기 회로와 전지 2 개를 직렬연결한 전기 회로에 각각 버저를 연결하고 스위치를 닫았습니다. 버저에서 나는 소리가 더 큰 것을 골라 봅시다.",
+ opts:["㉠ 전지 1 개를 연결한 전기 회로","㉡ 전지 2 개를 직렬연결한 전기 회로"],ans:1,
+ exp:"전기 회로에 전지 2 개를 직렬연결하면 전지 1 개를 연결할 때보다 버저에서 나는 소리가 더 크다."},
+{t:"보충",src:"보충 5회 6번",type:"mc",lab:true,
+ q:"전자석을 만들기 위해 철 막대에 가는 전선을 감는 방법으로 옳지 않은 것을 골라 봅시다.",
+ opts:["전선을 촘촘하게 감는다.","전선을 한쪽 방향으로 감는다.","철 막대에 감은 전선이 움직일 수 있게 느슨하게 감는다."],ans:2,
+ exp:"철 막대에 전선을 감을 때에는 한쪽 방향으로 촘촘하게 감는다."},
+{t:"보충",src:"보충 3회 8번",type:"mc",lab:true,fig:"compass2",
+ q:"전자석의 양 끝에 나침반을 놓고 스위치를 닫았습니다. ㉠ 쪽은 나침반 바늘의 N극이 가리키고, ㉡ 쪽은 나침반 바늘의 S극이 가리킵니다. 전자석의 ㉠과 ㉡ 중에서 S극을 골라 봅시다.",
+ opts:["㉠","㉡"],ans:0,
+ exp:"㉠은 나침반 바늘의 N극이 가리키므로 S극이고, ㉡은 나침반 바늘의 S극이 가리키므로 N극이다."},
+{t:"보충",src:"보충 2회 9번",type:"mc",
+ q:"전자석이 사용되는 예가 아닌 것을 골라 봅시다.",
+ opts:["㉠ 스피커","㉡ 자석 집게","㉢ 전기 항공기","㉣ 전자석 기중기"],ans:1,
+ exp:"스피커, 전기 항공기, 전자석 기중기에는 전자석이 사용되었지만, 자석 집게에는 영구 자석이 사용되었다."},
+
+/* ===== 기본 ===== */
+{t:"기본",src:"기본 1회 6번",type:"short",
+ q:"전기가 잘 흐르는 물질을 도체라고 합니다. 전기가 잘 흐르지 않는 물질은 무엇이라고 하는지 써 봅시다.",
+ ans:["부도체"],
+ exp:"전기가 잘 흐르는 물질을 도체라고 하고, 전기가 잘 흐르지 않는 물질을 부도체라고 한다."},
+{t:"기본",src:"기본 2회 5번",type:"mc",
+ q:"도체와 부도체에 대한 설명으로 옳은 것을 골라 봅시다.",
+ opts:["㉠ 부도체는 철, 구리, 알루미늄 등이다.","㉡ 도체는 나무, 비닐, 유리, 종이 등이다.","㉢ 도체를 전기 회로에 연결하면 전구에 불이 켜진다."],ans:2,
+ exp:"철, 구리, 알루미늄 등과 같이 전기가 잘 흐르는 물질을 도체라고 한다. 나무, 비닐, 유리, 종이 등과 같이 전기가 잘 흐르지 않는 물질을 부도체라고 한다."},
+{t:"기본",src:"기본 3회 5번",type:"mc",
+ q:"도체와 부도체를 바르게 짝 지은 것을 골라 봅시다.",
+ opts:["도체: 철 — 부도체: 구리","도체: 철 — 부도체: 유리","도체: 나무 — 부도체: 비닐","도체: 유리 — 부도체: 철","도체: 구리 — 부도체: 알루미늄"],ans:1,num:true,
+ exp:"철, 구리, 알루미늄은 도체이고, 유리, 나무, 비닐은 부도체이다."},
+{t:"기본",src:"기본 3회 6번",type:"short",lab:true,
+ q:"전기가 잘 흐르는 물체와 전기가 잘 흐르지 않는 물체로 분류한 것입니다. 잘못 분류한 물체를 골라 써 봅시다.",
+ table:{head:["전기가 잘 흐르는 물체","전기가 잘 흐르지 않는 물체"],rows:[["쇠못, 철 클립, 비닐봉지","긴 유리판, 색종이, 플라스틱 자"]]},
+ ans:["비닐봉지"],
+ exp:"비닐봉지는 전기가 잘 흐르지 않는 물질로 이루어져 있다."},
+{t:"기본",src:"기본 1회 7번",type:"short",
+ q:"전지 여러 개를 서로 다른 극끼리 연결한 것을 전지의 무엇이라고 하는지 써 봅시다.",
+ ans:["직렬연결","직렬 연결","직렬","전지의 직렬연결"],
+ exp:"전지 여러 개를 서로 다른 극끼리 연결한 것을 전지의 직렬연결이라고 한다."},
+{t:"기본",src:"기본 1회 8번",type:"mc",lab:true,
+ q:"전기 회로에 연결한 전지의 수에 따른 전구의 밝기를 비교하는 실험을 하려고 합니다. 다르게 할 조건으로 옳은 것을 골라 봅시다.",
+ opts:["㉠ 전지의 종류","㉡ 전구의 종류와 수","㉢ 직렬연결하는 전지의 수"],ans:2,
+ exp:"전기 회로에 연결한 전지의 수에 따른 전구의 밝기를 비교하는 실험에서는 전기 회로에 직렬연결하는 전지의 수를 다르게 해야 한다."},
+{t:"기본",src:"기본 2회 9번",type:"mc",lab:true,fig:"bulbs",
+ q:"전구의 밝기를 비교하는 실험에 대한 설명으로 옳은 것을 골라 봅시다.",
+ opts:["㉠ 스위치를 닫으면 전구에 불이 켜지지 않는다.","㉡ 전기 회로에 연결한 전구의 밝기는 항상 일정하다.","㉢ 전기 회로에 직렬연결한 전지의 수에 따라 전구의 밝기가 달라진다."],ans:2,
+ exp:"전기 회로에 직렬연결한 전지의 수를 다르게 하여 전구의 밝기를 비교하는 실험이다. 전지 2 개를 직렬연결하면 전지 1 개를 연결할 때보다 전구의 밝기가 더 밝다."},
+{t:"기본",src:"기본 2회 10번",type:"mc",lab:true,
+ q:"전지 1 개를 연결한 전기 회로와 전지 2 개를 직렬연결한 전기 회로에 각각 전동기를 연결하고 스위치를 닫았을 때 나타나는 현상으로 옳은 것을 골라 봅시다.",
+ opts:["㉠ 전지 1 개를 연결한 전기 회로의 전동기 날개만 돌아간다.","㉡ 전지 2 개를 직렬연결한 전기 회로의 전동기 날개만 돌아간다.","㉢ 전지 1 개를 연결한 전기 회로보다 전지 2 개를 직렬연결한 전기 회로의 전동기 날개가 더 빠르게 돌아간다."],ans:2,
+ exp:"전지 2 개를 직렬연결한 전기 회로의 스위치를 닫으면 전지 1 개를 연결할 때보다 전동기 날개가 더 빠르게 돌아간다."},
+{t:"기본",src:"기본 1회 11번",type:"short",
+ q:"전기가 흐를 때에만 자석의 성질이 나타나는 것을 무엇이라고 하는지 써 봅시다.",
+ ans:["전자석"],
+ exp:"전기가 흐를 때에만 자석의 성질이 나타나는 것을 전자석이라고 한다."},
+{t:"기본",src:"기본 3회 12번",type:"mc",lab:true,
+ q:"전선을 감은 철 막대, 전지, 스위치를 연결한 전자석에서 스위치를 닫았더니 철 막대에 철 클립이 붙었습니다. 이제 스위치를 열면 어떻게 될까요?",
+ opts:["㉠ 아무런 변화가 없다.","㉡ 철 막대에 철 클립이 더 많이 붙는다.","㉢ 철 막대에 붙어 있던 철 클립이 떨어진다."],ans:2,
+ exp:"스위치를 열면 전자석에 전기가 흐르지 않아 자석의 성질이 나타나지 않기 때문에 철 막대에 붙어 있던 철 클립이 떨어진다."},
+{t:"기본",src:"기본 2회 13번",type:"mc",lab:true,
+ q:"(  ) 안에 들어갈 알맞은 말을 골라 봅시다.",
+ box:"전자석에 전지 2 개를 직렬연결하면 전지 1 개를 연결할 때보다 전자석의 세기가 더 <span class='blank'>?</span>.",
+ opts:["크다","작다"],ans:0,
+ exp:"전자석에 전지 2 개를 직렬연결하면 전지 1 개를 연결할 때보다 전자석의 세기가 더 크다."},
+{t:"기본",src:"기본 3회 14번",type:"short",lab:true,
+ q:"전자석의 양 끝에 나침반을 놓고 바늘이 가리키는 방향을 관찰한 뒤 전지의 방향을 바꾸었습니다. (  ) 안에 들어갈 알맞은 말을 써 봅시다.",
+ box:"전자석에 연결한 전지의 방향을 바꾸면 전자석의 두 <span class='blank'>?</span> 이/가 서로 바뀌므로 나침반 바늘이 가리키는 방향이 바뀐다.",
+ ans:["극","자극"],
+ exp:"전지의 연결 방향을 바꾸면 전자석의 두 극이 서로 바뀌므로 나침반 바늘이 가리키는 방향이 바뀐다."},
+{t:"기본",src:"기본 2회 15번",type:"mc",
+ q:"전자석에 대해 잘못 설명한 것을 골라 봅시다.",
+ opts:["㉠ 전자석은 전선을 감은 철 막대, 전지, 스위치를 전선으로 연결하여 만든다.","㉡ 전자석에 연결한 전지의 방향을 바꾸면 자석의 세기를 조절할 수 있다.","㉢ 전자석에 직렬연결한 전지의 개수를 다르게 하면 자석의 세기를 조절할 수 있다."],ans:1,
+ exp:"전자석에 연결한 전지의 방향을 바꾸면 전자석의 두 극이 서로 바뀐다. 자석의 세기는 직렬연결한 전지의 개수를 다르게 하여 조절한다."},
+{t:"기본",src:"기본 2회 16번",type:"short",
+ q:"다음은 무엇에 대한 설명인지 써 봅시다.",
+ box:"• 항상 자석의 성질을 띠는 자석이다.<br>• N극과 S극을 바꿀 수 없는 자석이다.",
+ ans:["영구 자석","영구자석"],
+ exp:"영구 자석은 항상 자석의 성질을 띠고, N극과 S극을 바꿀 수 없다."},
+{t:"기본",src:"기본 1회 18번",type:"mc",
+ q:"(  ) 안에 들어갈 알맞은 말을 골라 봅시다.",
+ box:"<span class='blank'>?</span> 은/는 전자석의 세기나 극을 바꿀 수 있는 성질을 이용해 프로펠러를 돌린다.",
+ opts:["스피커","전기 항공기","전자석 기중기"],ans:1,
+ exp:"전기 항공기는 전자석의 세기나 극을 바꿀 수 있는 성질을 이용해 프로펠러를 돌린다."},
+{t:"기본",src:"기본 3회 19번",type:"mc",
+ q:"전기 제품에 붙어 있는 에너지 소비 효율 등급에 대한 설명입니다. (  ) 안에 알맞은 말을 골라 봅시다.",
+ box:"에너지 소비 효율 등급이 1 등급에 가까울수록 전기를 <span class='blank'>?</span> 하는 데 도움이 된다.",
+ opts:["낭비","절약"],ans:1,
+ exp:"에너지 소비 효율 등급이 1 등급에 가까울수록 전기를 절약하는 데 도움이 된다."},
+{t:"기본",src:"기본 2회 19번",type:"mc",
+ q:"전기를 사용하는 모습을 보고 고쳐야 할 점을 설명한 것입니다. (  ) 안에 알맞은 말을 골라 봅시다.",
+ box:"플러그를 뽑을 때 전선을 잡아당기면 위험하므로 <span class='blank'>?</span> 을/를 잡고 뽑아야 한다.",
+ opts:["전선","머리 부분"],ans:1,
+ exp:"플러그를 뽑을 때 전선을 잡아당기면 위험하므로 머리 부분을 잡고 뽑아야 한다."},
+
+/* ===== 심화 ===== */
+{t:"심화",src:"심화 1회 3번",type:"mc",
+ q:"도체인 것을 골라 봅시다.",
+ opts:["㉠ 유리","㉡ 비닐","㉢ 알루미늄","㉣ 플라스틱"],ans:2,
+ exp:"전기가 잘 흐르는 물질을 도체라고 하고, 도체에는 철, 구리, 알루미늄 등이 있다."},
+{t:"심화",src:"심화 3회 3번",type:"mc",lab:true,
+ q:"긴 유리판, 나무젓가락, 플라스틱 자를 각각 전기 회로에 연결했습니다. 세 물체의 공통점과 그 까닭으로 옳은 것을 골라 봅시다.",
+ opts:["전구에 불이 켜진다. 전기가 잘 흐르는 도체이기 때문이다.","전구에 불이 켜지지 않는다. 전기가 잘 흐르는 도체이기 때문이다.","전구에 불이 켜지지 않는다. 전기가 흐르지 않는 부도체이기 때문이다."],ans:2,
+ exp:"유리, 나무, 플라스틱은 전기가 잘 흐르지 않는 부도체이므로 전기 회로에 연결하면 전구에 불이 켜지지 않는다."},
+{t:"심화",src:"심화 4회 3번",type:"mc",lab:true,
+ q:"여러 가지 물체를 전기 회로에 연결하고 스위치를 닫았을 때 나타나는 현상을 보고 분류한 결과입니다. 물체를 분류한 기준을 골라 봅시다.",
+ table:{head:["그렇다.","그렇지 않다."],rows:[["쇠못, 철 클립, 알루미늄 포일","비닐봉지, 색종이, 플라스틱 빨대"]]},
+ opts:["자석에 붙는 것인가?","전구에 불이 켜지는 것인가?","물에 뜨는 것인가?"],ans:1,
+ exp:"쇠못, 철 클립, 알루미늄 포일을 전기 회로에 연결하고 스위치를 닫으면 전구에 불이 켜지고, 비닐봉지, 색종이, 플라스틱 빨대를 연결하면 전구에 불이 켜지지 않는다."},
+{t:"심화",src:"심화 1회 5번",type:"mc",lab:true,fig:"compassS",
+ q:"전자석의 한쪽 끝에 나침반을 놓고 스위치를 닫았더니 나침반 바늘의 S극이 전자석 쪽을 가리켰습니다. 나침반을 치우고 그 자리에 막대자석의 N극을 가까이 하면 어떻게 될까요?",
+ opts:["전자석과 막대자석이 서로 밀어 낸다.","전자석과 막대자석이 서로 끌어당긴다."],ans:0,
+ exp:"나침반 바늘의 S극이 전자석을 향하고 있으므로, 전자석의 그쪽 끝은 N극을 띤다. 따라서 막대자석의 N극을 가까이 하면 서로 밀어 낸다."},
+{t:"심화",src:"심화 3회 8번",type:"mc",lab:true,fig:"compassN",
+ q:"전자석의 양쪽 끝에 나침반을 놓고 스위치를 닫았더니 나침반 바늘의 N극이 전자석의 ㉠ 쪽을 가리켰습니다. ㉠에 막대자석의 N극을 가까이 하면 어떻게 될까요?",
+ opts:["전자석과 막대자석이 서로 밀어 낸다.","전자석과 막대자석이 서로 끌어당긴다."],ans:1,
+ exp:"나침반 바늘의 N극이 전자석의 ㉠을 향하고 있으므로 ㉠은 S극을 띤다. 따라서 막대자석의 N극을 가까이 하면 서로 끌어당긴다."},
+{t:"심화",src:"심화 4회 7번",type:"mc",lab:true,
+ q:"전자석에 연결한 전지의 수에 따라 전선을 감은 철 막대에 붙은 철 클립의 수를 정리한 것입니다. 이 실험 결과를 통해 알 수 있는 전자석의 성질을 골라 봅시다.",
+ table:{head:["전지 1 개를 연결한 전자석","전지 2 개를 직렬연결한 전자석"],rows:[["철 클립이 4 개 붙었다.","철 클립이 8 개 붙었다."]]},
+ opts:["직렬연결한 전지의 수가 늘어나면 전자석의 세기가 커진다.","직렬연결한 전지의 수가 늘어나면 전자석의 두 극이 바뀐다.","전자석의 세기는 전지의 수와 관계없이 일정하다."],ans:0,
+ exp:"전자석에 전지 2 개를 직렬연결하면 전지 1 개를 연결할 때보다 전자석의 세기가 커진다."},
+{t:"심화",src:"심화 5회 7번",type:"mc",lab:true,
+ q:"전지 2 개를 직렬연결한 전기 회로에 버저를 연결했습니다. 버저에서 나는 소리를 더 크게 할 수 있는 방법을 골라 봅시다.",
+ opts:["전지 1 개만 연결한다.","전지 1 개를 더 추가해 전지 3 개를 직렬연결한다."],ans:1,
+ exp:"전기 회로에 연결한 전지의 수에 따라 버저에서 나는 소리의 크기가 달라진다. 전지 1 개만 연결하면 소리가 더 작아지고, 전지 1 개를 더 추가해 전지 3 개를 직렬연결하면 소리가 더 커진다."},
+{t:"심화",src:"심화 2회 7번",type:"mc",
+ q:"전자석에 대한 설명으로 옳지 않은 것을 골라 봅시다.",
+ opts:["㉠ 전자석은 자석의 세기를 조절할 수 있다.","㉡ 전자석은 전기가 흐를 때에만 자석의 성질이 나타난다.","㉢ 전자석은 직렬연결한 전지의 수에 따라 N극과 S극을 바꿀 수 있다."],ans:2,
+ exp:"전자석은 전지의 연결 방향을 바꿔 N극과 S극을 바꿀 수 있다. 직렬연결한 전지의 수로는 세기를 조절한다."},
+{t:"심화",src:"심화 3회 10번",type:"mc",
+ q:"전기를 효율적이고 안전하게 사용하는 방법으로 잘못된 것을 골라 봅시다.",
+ opts:["㉠ 에어컨을 사용할 때에는 창문 닫기","㉡ 욕실에서 덮개가 있는 콘센트 사용하기","㉢ 에너지 소비 효율 등급이 5 등급에 가까운 전기 제품 사용하기"],ans:2,
+ exp:"에너지 소비 효율 등급이 1 등급에 가까울수록 에너지 절약형 제품이므로 전기를 절약하는 데 도움이 된다."},
+{t:"심화",src:"심화 2회 10번",type:"mc",
+ q:"생활 속에서 전기를 효율적이고 안전하게 사용하지 않은 친구를 골라 봅시다.",
+ opts:["(가) 교실에 아무도 없을 때 전등을 껐어.","(나) 교실 창문을 모두 열어 놓고 에어컨을 켰어.","(다) 냉장고에서 음료수를 꺼낸 후 냉장고 문을 닫았어."],ans:1,
+ exp:"전기를 효율적이고 안전하게 사용하려면 에어컨을 켤 때 창문을 닫아야 한다."}
+];
+Q.forEach((q,i)=>q.id=i);
+const TOTAL = Q.length;           // 40
+const PER_LEVEL = 5;              // 5문제마다 레벨업 → 8단계
+
+const LEVELS = [
+ {name:"방전된 꼬마 건전지", desc:"아직 힘이 하나도 없어요. 문제를 맞혀 충전해 주세요!"},
+ {name:"충전 시작! 건전지 꼬마", desc:"눈이 반짝! 전기가 조금씩 차오르고 있어요."},
+ {name:"반짝 전구 소년", desc:"머리 위 전구에 불이 켜졌어요. 회로가 연결됐어요!"},
+ {name:"전선 망토 레인저", desc:"끊어지지 않는 전선처럼 튼튼한 망토를 둘렀어요."},
+ {name:"도체 파이터", desc:"가슴에 번개 문장이 새겨졌어요. 전기가 잘 흐르는 몸!"},
+ {name:"직렬 부스터", desc:"전지를 직렬연결한 듯 힘이 두 배! 코일 장갑을 얻었어요."},
+ {name:"전자석 가디언", desc:"번개 부츠로 공중에 떠올랐어요. 세기를 마음대로 조절해요."},
+ {name:"자기장 마스터", desc:"N극과 S극을 자유자재로! 번개 헬멧을 썼어요."},
+ {name:"번개 히어로 · 완전체", desc:"모든 문제를 정복했어요! 전기의 힘을 완전히 다루는 영웅!"}
+];
+const BODY = ["#7d8296","#8aa0c9","#5aa9e6","#45bdf0","#35d0d0","#44df8f","#a8e04a","#ffd23f","#ffc21a"];
+
+/* ---------- 캐릭터 SVG ---------- */
+function heroSVG(lv, uid){
+  const on = n => lv >= n;
+  const body = BODY[lv];
+  const charge = lv/8;
+  const winH = 58, fillH = Math.max(0, winH*charge);
+  const armR = on(8) ? "M154 136 L188 92" : "M154 136 L176 186";
+  const handR = on(8) ? [188,92] : [176,186];
+  let s = `<svg viewBox="0 0 240 300" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Lv.${lv} ${LEVELS[lv].name}">
+  <defs>
+    <radialGradient id="au${uid}" cx="50%" cy="50%" r="50%"><stop offset="0" stop-color="#fff3b0" stop-opacity=".9"/><stop offset=".55" stop-color="#ffd23f" stop-opacity=".35"/><stop offset="1" stop-color="#ffd23f" stop-opacity="0"/></radialGradient>
+    <linearGradient id="ch${uid}" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stop-color="#3ddc84"/><stop offset="1" stop-color="#4fe3ff"/></linearGradient>
+    <radialGradient id="bl${uid}" cx="50%" cy="45%" r="60%"><stop offset="0" stop-color="#fffbe0"/><stop offset=".6" stop-color="#ffd23f"/><stop offset="1" stop-color="#ffb000"/></radialGradient>
+  </defs>`;
+  if(on(8)){
+    s += `<circle cx="120" cy="150" r="118" fill="url(#au${uid})" class="glow-pulse"/>
+    <g class="aura-spin" stroke="#ffd23f" stroke-width="4" stroke-linecap="round" opacity=".7">
+      ${Array.from({length:12},(_,i)=>{const a=i*30*Math.PI/180;const x1=120+Math.cos(a)*100,y1=150+Math.sin(a)*100,x2=120+Math.cos(a)*116,y2=150+Math.sin(a)*116;return `<line x1="${x1.toFixed(1)}" y1="${y1.toFixed(1)}" x2="${x2.toFixed(1)}" y2="${y2.toFixed(1)}"/>`}).join("")}
+    </g>
+    <g fill="#ffd23f" stroke="#fff6c2" stroke-width="2" stroke-linejoin="round">
+      <polygon points="88,138 18,96 46,140 6,150 50,166 20,204 92,172"/>
+      <polygon points="152,138 222,96 194,140 234,150 190,166 220,204 148,172"/>
+    </g>`;
+  }
+  const inner = [];
+  // cape
+  if(on(3)) inner.push(`<path d="M90 126 Q58 228 70 266 L120 250 L170 266 Q182 228 150 126 Z" fill="#e63946" stroke="#9d1d2a" stroke-width="3"/>`);
+  // legs + shoes/boots
+  inner.push(`<rect x="98" y="222" width="16" height="34" rx="6" fill="#2b3358"/><rect x="126" y="222" width="16" height="34" rx="6" fill="#2b3358"/>`);
+  if(on(6)){
+    inner.push(`<rect x="91" y="246" width="28" height="18" rx="7" fill="#ffd23f" stroke="#b38d10" stroke-width="2"/><rect x="121" y="246" width="28" height="18" rx="7" fill="#ffd23f" stroke="#b38d10" stroke-width="2"/>
+    <polygon points="106,248 100,257 105,257 102,263 110,253 105,253" fill="#e63946"/><polygon points="136,248 130,257 135,257 132,263 140,253 135,253" fill="#e63946"/>`);
+  } else {
+    inner.push(`<rect x="93" y="250" width="24" height="12" rx="6" fill="#454c6e"/><rect x="123" y="250" width="24" height="12" rx="6" fill="#454c6e"/>`);
+  }
+  // arms
+  inner.push(`<path d="M86 136 L64 186" stroke="${body}" stroke-width="13" stroke-linecap="round" fill="none"/><path d="${armR}" stroke="${body}" stroke-width="13" stroke-linecap="round" fill="none"/>`);
+  // torso = battery
+  inner.push(`<rect x="82" y="118" width="76" height="110" rx="18" fill="${body}" stroke="rgba(0,0,0,.35)" stroke-width="3"/>
+   <text x="120" y="140" text-anchor="middle" font-size="16" font-weight="700" fill="rgba(0,0,0,.45)" font-family="sans-serif">+</text>
+   <rect x="96" y="148" width="48" height="${winH+4}" rx="7" fill="#0b1020" stroke="rgba(0,0,0,.4)" stroke-width="2"/>
+   ${fillH>0?`<rect x="98" y="${150+winH-fillH}" width="44" height="${fillH}" rx="5" fill="url(#ch${uid})"/>`:""}
+   <text x="120" y="224" text-anchor="middle" font-size="14" font-weight="700" fill="rgba(0,0,0,.45)" font-family="sans-serif">−</text>`);
+  if(on(4)) inner.push(`<polygon points="128,150 106,184 119,184 110,212 136,174 123,174 132,150" fill="#ffd23f" stroke="#7a5b00" stroke-width="2" stroke-linejoin="round"/>`);
+  // hands / gauntlets
+  const hands = [[64,186],handR];
+  hands.forEach(([x,y])=>{
+    if(on(5)){
+      inner.push(`<g><circle cx="${x}" cy="${y}" r="13" fill="#b87333" stroke="#6e3f12" stroke-width="2"/>
+       <path d="M${x-10} ${y-5} h20 M${x-11} ${y} h22 M${x-10} ${y+5} h20" stroke="#ffcf8a" stroke-width="1.6"/></g>`);
+    } else {
+      inner.push(`<circle cx="${x}" cy="${y}" r="9" fill="#ffe0b8" stroke="rgba(0,0,0,.25)" stroke-width="2"/>`);
+    }
+  });
+  if(on(8)) inner.push(`<polygon points="196,60 186,80 194,80 186,96 204,74 195,74 202,60" fill="#fff6c2" stroke="#ffd23f" stroke-width="2"/>`);
+  // antenna bulb
+  if(on(2)){
+    inner.push(`<line x1="120" y1="40" x2="120" y2="20" stroke="#9ba5cf" stroke-width="4" stroke-linecap="round"/>
+     <circle cx="120" cy="13" r="15" fill="#ffd23f" opacity=".35" class="glow-pulse"/>
+     <circle cx="120" cy="13" r="9" fill="url(#bl${uid})" stroke="#b38d10" stroke-width="1.5"/>`);
+  }
+  // head
+  inner.push(`<circle cx="120" cy="80" r="42" fill="#ffe0b8" stroke="rgba(0,0,0,.25)" stroke-width="3"/>`);
+  if(on(7)){
+    inner.push(`<path d="M76 80 Q76 32 120 32 Q164 32 164 80 L155 80 Q152 48 120 46 Q88 48 85 80 Z" fill="#ffd23f" stroke="#b38d10" stroke-width="2"/>
+     <polygon points="80,64 56,40 70,62 52,58 76,80" fill="#fff6c2" stroke="#ffd23f" stroke-width="2"/>
+     <polygon points="160,64 184,40 170,62 188,58 164,80" fill="#fff6c2" stroke="#ffd23f" stroke-width="2"/>
+     <rect x="86" y="72" width="68" height="20" rx="10" fill="#1d2b6b"/>`);
+  } else {
+    inner.push(`<path d="M80 74 Q82 38 120 38 Q160 38 162 76 Q150 58 132 62 Q120 48 104 62 Q92 56 80 74 Z" fill="#2b2140"/>`);
+  }
+  // face
+  if(lv===0){
+    inner.push(`<path d="M100 84 q6 5 12 0 M128 84 q6 5 12 0" stroke="#2b2140" stroke-width="3" fill="none" stroke-linecap="round"/>
+     <path d="M112 102 h16" stroke="#2b2140" stroke-width="3" stroke-linecap="round"/>
+     <text x="150" y="58" font-size="14" fill="#9ba5cf" font-family="sans-serif">z</text><text x="160" y="46" font-size="11" fill="#9ba5cf" font-family="sans-serif">z</text>`);
+  } else {
+    const eye = on(6) ? "#4fe3ff" : "#1a1a2e";
+    inner.push(`<circle cx="106" cy="82" r="6.5" fill="${eye}"/><circle cx="134" cy="82" r="6.5" fill="${eye}"/>
+     <circle cx="108" cy="80" r="2.2" fill="#fff"/><circle cx="136" cy="80" r="2.2" fill="#fff"/>
+     <circle cx="96" cy="96" r="5" fill="#ff8fa3" opacity=".6"/><circle cx="144" cy="96" r="5" fill="#ff8fa3" opacity=".6"/>
+     <path d="M108 99 q12 ${on(4)?13:9} 24 0" stroke="#2b2140" stroke-width="3" fill="${on(4)?'#fff':'none'}" stroke-linecap="round" stroke-linejoin="round"/>`);
+  }
+  if(on(8)){
+    inner.push(`<g fill="#fff6c2">${[[40,60],[200,40],[30,240],[210,250],[60,20]].map(([x,y])=>`<path d="M${x} ${y-7} L${x+2} ${y-2} L${x+7} ${y} L${x+2} ${y+2} L${x} ${y+7} L${x-2} ${y+2} L${x-7} ${y} L${x-2} ${y-2} Z" class="glow-pulse"/>`).join("")}</g>`);
+  }
+  s += `<g class="${on(6)?'hero-float':''}">${inner.join("")}</g></svg>`;
+  return s;
+}
+
+/* ---------- 실험 그림 ---------- */
+const INK = "#2d3561";
+function batt(x,y){return `<g><rect x="${x}" y="${y}" width="44" height="22" rx="5" fill="#ffd93b" stroke="${INK}" stroke-width="3"/><rect x="${x+44}" y="${y+6}" width="5" height="10" fill="${INK}"/><text x="${x+9}" y="${y+17}" font-size="14" font-weight="700" fill="${INK}">−</text><text x="${x+28}" y="${y+17}" font-size="14" font-weight="700" fill="${INK}">+</text></g>`}
+function bulb(cx,cy,glow){return `<g>${glow?`<circle cx="${cx}" cy="${cy}" r="${glow}" fill="#ffd93b" opacity=".45"/>`:""}<circle cx="${cx}" cy="${cy}" r="14" fill="${glow?'#fff3a0':'#d8dcef'}" stroke="${INK}" stroke-width="3"/><rect x="${cx-7}" y="${cy+12}" width="14" height="10" fill="#9aa3c7" stroke="${INK}" stroke-width="2"/></g>`}
+const FIGS = {
+  bulbs:()=>`<svg viewBox="0 0 470 180" width="560" aria-label="전지 1 개 회로와 전지 2 개 직렬연결 회로의 전구 밝기 비교">
+    <g fill="none" stroke="#3fa2ff" stroke-width="4"><rect x="30" y="44" width="160" height="90" rx="12"/><rect x="262" y="44" width="176" height="90" rx="12"/></g>
+    ${bulb(110,44,26)}${batt(86,123)}
+    ${bulb(350,44,46)}${batt(300,123)}${batt(350,123)}
+    <text x="110" y="174" text-anchor="middle" font-size="15" font-weight="700" fill="${INK}">전지 1 개</text>
+    <text x="350" y="174" text-anchor="middle" font-size="15" font-weight="700" fill="${INK}">전지 2 개 직렬연결</text></svg>`,
+  scissors:()=>`<svg viewBox="0 0 360 140" width="460" aria-label="가위 그림: ㉠ 날 부분, ㉡ 손잡이 부분">
+    <g transform="translate(20,20)">
+      <polygon points="150,40 300,30 300,44 150,52" fill="#dfe4f2" stroke="${INK}" stroke-width="3"/>
+      <polygon points="150,52 300,60 300,74 150,62" fill="#c4cbe0" stroke="${INK}" stroke-width="3"/>
+      <circle cx="150" cy="52" r="6" fill="${INK}"/>
+      <ellipse cx="90" cy="30" rx="40" ry="20" fill="none" stroke="#ff6b6b" stroke-width="11"/>
+      <ellipse cx="90" cy="76" rx="40" ry="20" fill="none" stroke="#ff6b6b" stroke-width="11"/>
+      <text x="236" y="16" font-size="20" font-weight="700" fill="${INK}">㉠ 날</text>
+      <text x="30" y="114" font-size="20" font-weight="700" fill="${INK}">㉡ 손잡이</text>
+    </g></svg>`,
+  compass2:()=>emFig({left:"N", right:"S", labels:true}),
+  compassS:()=>emFig({right:"S", single:true}),
+  compassN:()=>emFig({left:"N", right:"S", labels:"left"})
+};
+/* 전자석 + 나침반: left/right = 전자석 쪽을 가리키는 바늘 극 */
+function emFig(o){
+  const needle=(cx,cy,toward,side)=>{
+    const pointsRight = (side==="L") === (toward==="N"); // 빨간(N) 끝이 오른쪽을 향하는가
+    const tipR = pointsRight ? "#ff4d4d" : "#ffffff", tipL = pointsRight ? "#ffffff" : "#ff4d4d";
+    return `<g><circle cx="${cx}" cy="${cy}" r="28" fill="#f2f6ff" stroke="${INK}" stroke-width="4"/>
+      <polygon points="${cx},${cy-6} ${cx+23},${cy} ${cx},${cy+6}" fill="${tipR}" stroke="${INK}" stroke-width="1.5"/>
+      <polygon points="${cx},${cy-6} ${cx-23},${cy} ${cx},${cy+6}" fill="${tipL}" stroke="${INK}" stroke-width="1.5"/>
+      <circle cx="${cx}" cy="${cy}" r="4" fill="${INK}"/></g>`;
+  };
+  const coil = Array.from({length:14},(_,i)=>`<line x1="${150+i*12}" y1="58" x2="${156+i*12}" y2="102" stroke="#c0661c" stroke-width="5"/>`).join("");
+  let s = `<svg viewBox="0 0 480 190" width="560" aria-label="전자석 양 끝에 놓은 나침반">
+    <rect x="140" y="64" width="180" height="32" rx="5" fill="#9aa3c7" stroke="${INK}" stroke-width="3"/>${coil}
+    <path d="M160 102 L160 152 L210 152 M300 102 L300 152 L262 152" stroke="#3fa2ff" stroke-width="4" fill="none"/>
+    ${batt(212,141)}`;
+  if(!o.single){ s += needle(88,80,o.left,"L"); }
+  s += needle(382,80,o.right,"R");
+  if(o.labels===true){ s += `<text x="140" y="50" font-size="22" font-weight="700" fill="${INK}">㉠</text><text x="300" y="50" font-size="22" font-weight="700" fill="${INK}">㉡</text>`; }
+  if(o.labels==="left"){ s += `<text x="140" y="50" font-size="22" font-weight="700" fill="${INK}">㉠</text>`; }
+  s += `<text x="10" y="184" font-size="15" font-weight="700" fill="${INK}">나침반 바늘: 빨간 쪽이 N극</text></svg>`;
+  return s;
+}
+
+/* ---------- 상태 ---------- */
+const KEY = "bolt-hero-v1";
+let S = null;
+let sound = true;
+function fresh(){ return {queue:Q.map(q=>q.id), correct:[], wrongEver:[], retry:[], attempts:0, started:false}; }
+function save(){ try{ localStorage.setItem(KEY, JSON.stringify(S)); }catch(e){} }
+function load(){ try{ const v = JSON.parse(localStorage.getItem(KEY)); if(v && Array.isArray(v.queue)) return v; }catch(e){} return null; }
+const level = () => Math.min(8, Math.floor(S.correct.length / PER_LEVEL));
+
+/* ---------- 소리 ---------- */
+let ac = null;
+function tone(freqs, dur=.12, type="square", gap=.09){
+  if(!sound) return;
+  try{
+    ac = ac || new (window.AudioContext||window.webkitAudioContext)();
+    freqs.forEach((f,i)=>{
+      const o = ac.createOscillator(), g = ac.createGain();
+      o.type = type; o.frequency.value = f;
+      const t = ac.currentTime + i*gap;
+      g.gain.setValueAtTime(.0001,t); g.gain.exponentialRampToValueAtTime(.12,t+.01); g.gain.exponentialRampToValueAtTime(.0001,t+dur);
+      o.connect(g).connect(ac.destination); o.start(t); o.stop(t+dur+.02);
+    });
+  }catch(e){}
+}
+const sfx = {
+  ok:()=>tone([660,990],.12,"square",.08),
+  no:()=>tone([220,160],.18,"sawtooth",.12),
+  up:()=>{ zzzap(.7); setTimeout(()=>tone([523,659,784,1047,1319],.16,"square",.08), 600); },
+  win:()=>{ zzzap(1.8); setTimeout(()=>tone([523,659,784,1047,784,1047,1319,1568],.2,"triangle",.1), 1500); }
+};
+/* 찌이잉~ 전기가 통하는 소리: 점점 높아지는 윙윙 소리 + 파지직 잡음 */
+function zzzap(dur){
+  if(!sound) return;
+  try{
+    ac = ac || new (window.AudioContext||window.webkitAudioContext)();
+    const t = ac.currentTime;
+    const master = ac.createGain();
+    master.gain.setValueAtTime(.0001,t);
+    master.gain.exponentialRampToValueAtTime(.2,t+.05);
+    master.gain.setValueAtTime(.2,t+dur*.8);
+    master.gain.exponentialRampToValueAtTime(.0001,t+dur);
+    master.connect(ac.destination);
+    const o = ac.createOscillator(); o.type = "sawtooth";
+    o.frequency.setValueAtTime(80,t);
+    o.frequency.exponentialRampToValueAtTime(700,t+dur*.7);
+    o.frequency.exponentialRampToValueAtTime(1500,t+dur);
+    const amp = ac.createGain(); amp.gain.value = .5;
+    const lfo = ac.createOscillator(); lfo.frequency.value = 40;
+    const lg = ac.createGain(); lg.gain.value = .5;
+    lfo.connect(lg).connect(amp.gain);
+    o.connect(amp).connect(master);
+    const buf = ac.createBuffer(1, Math.floor(ac.sampleRate*dur), ac.sampleRate);
+    const d = buf.getChannelData(0);
+    for(let i=0;i<d.length;i++) d[i] = (Math.random()*2-1) * (Math.random()<.02 ? 1 : .15);
+    const n = ac.createBufferSource(); n.buffer = buf;
+    const bp = ac.createBiquadFilter(); bp.type = "bandpass"; bp.Q.value = .8;
+    bp.frequency.setValueAtTime(800,t); bp.frequency.exponentialRampToValueAtTime(4000,t+dur);
+    n.connect(bp).connect(master);
+    [o,lfo,n].forEach(s=>{ s.start(t); s.stop(t+dur+.05); });
+  }catch(e){}
+}
+
+/* ---------- 16:9 무대 맞추기 ---------- */
+const W = 1600, H = 900;
+function fit(){
+  const cs = getComputedStyle(document.documentElement);
+  const padY = parseFloat(cs.paddingTop) + parseFloat(cs.paddingBottom);
+  const bs = getComputedStyle(document.body);
+  const de = document.documentElement;
+  const availW = de.clientWidth - parseFloat(bs.paddingLeft) - parseFloat(bs.paddingRight);
+  const availH = (window.visualViewport ? visualViewport.height : innerHeight) - padY - 24;
+  const s = Math.max(.1, Math.min(availW / W, availH / H));
+  const vp = $("viewport");
+  vp.style.width = (W*s) + "px"; vp.style.height = (H*s + 18*s) + "px";
+  $("stage").style.transform = `scale(${s})`;
+}
+addEventListener("resize", fit);
+
+/* ---------- 렌더 ---------- */
+const $ = id => document.getElementById(id);
+const esc = t => String(t).replace(/[&<>"]/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const CIRC = ["①","②","③","④","⑤"];
+let lastCells = 0;
+
+function renderSide(pop){
+  const lv = level();
+  $("heroImg").innerHTML = heroSVG(lv,"main");
+  $("lvlNum").textContent = "Lv." + lv;
+  $("lvlName").textContent = LEVELS[lv].name;
+  $("lvlDesc").textContent = LEVELS[lv].desc;
+  const inLv = lv>=8 ? PER_LEVEL : S.correct.length % PER_LEVEL;
+  $("cells").innerHTML = Array.from({length:PER_LEVEL},(_,i)=>`<div class="cell ${i<inLv?'on':''} ${pop && i===inLv-1?'pop':''}"></div>`).join("");
+  $("meterTxt").textContent = lv>=8 ? "완충!" : `${inLv} / ${PER_LEVEL}`;
+  $("sCorrect").textContent = S.correct.length;
+  $("sLeft").textContent = TOTAL - S.correct.length;
+  $("sRetry").textContent = S.retry.length;
+  $("progFill").style.width = (S.correct.length/TOTAL*100) + "%";
+  $("progTxt").textContent = `${S.correct.length} / ${TOTAL}`;
+  $("dex").innerHTML = LEVELS.map((L,i)=>`<div class="${i>lv?'locked':''} ${i===lv?'now':''}" title="Lv.${i} ${L.name}">${heroSVG(i,"d"+i)}</div>`).join("");
+}
+function hop(){ const h = $("heroImg"); h.classList.remove("hop"); void h.offsetWidth; h.classList.add("hop"); }
+
+function renderStart(){
+  const resume = S.started && S.correct.length < TOTAL;
+  $("card").innerHTML = `<div class="intro">
+    <h2>문제를 맞혀서 <span>번개 히어로</span>를 키워요!</h2>
+    <p>지금 내 히어로는 힘이 하나도 없는 꼬마 건전지예요. ‘전기의 이용’ 문제를 맞힐 때마다 배터리가 한 칸씩 충전되고, 다섯 칸이 모두 차면 레벨 업!</p>
+    <div class="rules">
+      <div class="rule"><b>5문제마다 레벨 업</b><span>40문제를 맞히면 8단계까지 진화해요.</span></div>
+      <div class="rule"><b>틀려도 괜찮아</b><span>풀이를 읽고 나면, 그 문제는 맨 뒤에서 다시 나와요.</span></div>
+      <div class="rule"><b>완전체에 도전!</b><span>40문제를 다 맞히면 번개 히어로 완전체가 나타나요.</span></div>
+    </div>
+    <div class="tiers"><span class="chip t-보충">보충 13문제</span><span class="chip t-기본">기본 17문제</span><span class="chip t-심화">심화 10문제</span><span class="chip lab">실험 문제도 있어요</span></div>
+    <div class="btns">
+      ${resume?`<button class="go" id="goResume" type="button">이어서 풀기 (${S.correct.length}/${TOTAL})</button><button class="go sun" id="goNew" type="button">처음부터</button>`
+              :`<button class="go" id="goNew" type="button">충전 시작!</button>`}
+    </div>
+  </div>`;
+  if(resume) $("goResume").onclick = ()=>{ renderQuestion(); };
+  $("goNew").onclick = ()=>{ S = fresh(); S.started = true; save(); renderSide(); renderQuestion(); };
+}
+
+function optLayout(opts){
+  const len = Math.max(...opts.map(o=>o.length));
+  if(opts.length===4 && len<=8) return "four";
+  if(opts.length%2===0 && len<=16) return "two";
+  return "";
+}
+
+function renderQuestion(){
+  if(S.correct.length >= TOTAL || !S.queue.length){ showFinal(); return; }
+  const q = Q[S.queue[0]];
+  const isRetry = S.retry.includes(q.id);
+  let body = "";
+  if(q.box) body += `<div class="box"><p>${q.box}</p></div>`;
+  if(q.fig) body += `<div class="fig">${FIGS[q.fig]()}</div>`;
+  if(q.table) body += `<div class="tbl"><table><thead><tr>${q.table.head.map(h=>`<th>${esc(h)}</th>`).join("")}</tr></thead><tbody>${q.table.rows.map(r=>`<tr>${r.map(c=>`<td>${esc(c)}</td>`).join("")}</tr>`).join("")}</tbody></table></div>`;
+  if(q.type==="mc"){
+    body += `<div class="opts ${optLayout(q.opts)}" role="group" aria-label="보기">${q.opts.map((o,i)=>`<button class="opt" type="button" data-i="${i}"><span class="k">${q.num?CIRC[i]:i+1}</span><span>${esc(o)}</span></button>`).join("")}</div>
+      <p class="hint">키보드 숫자 1~${q.opts.length}로도 고를 수 있어요.</p>`;
+  } else {
+    body += `<form class="short" id="shortForm" autocomplete="off"><label class="sr" for="shortIn">답 쓰기</label><input id="shortIn" type="text" placeholder="여기에 답을 써요" enterkeyhint="done"><button class="go" type="submit">확인</button></form>
+      <p class="hint">낱말로 답을 써요. 띄어쓰기는 틀려도 괜찮아요.</p>`;
+  }
+  $("card").innerHTML = `
+    <div class="meta">
+      <span class="chip t-${q.t}">${q.t}</span>
+      ${q.lab?'<span class="chip lab">실험</span>':''}
+      ${isRetry?'<span class="chip retry">다시 도전!</span>':''}
+    </div>
+    <p class="qno">${S.correct.length+1}번째 문제</p>
+    <p class="qtext">${esc(q.q)}</p>
+    ${body}
+    <div id="fbSlot"></div>`;
+  if(q.type==="mc"){
+    document.querySelectorAll(".opt").forEach(b=>b.onclick=()=>answer(q, +b.dataset.i));
+  } else {
+    const f = $("shortForm"), inp = $("shortIn");
+    f.onsubmit = e=>{ e.preventDefault(); if(!inp.value.trim()){ inp.focus(); return; } answer(q, inp.value); };
+    setTimeout(()=>inp.focus({preventScroll:true}),50);
+  }
+}
+
+const norm = t => String(t).replace(/[\s.,·()（）'"’“”]/g,"").toLowerCase();
+
+let pending = null; // 다음으로 넘어갈 때 할 일
+function answer(q, val){
+  if(pending) return;
+  S.attempts++;
+  const before = level();
+  let ok;
+  if(q.type==="mc"){
+    ok = val === q.ans;
+    document.querySelectorAll(".opt").forEach(b=>{
+      b.disabled = true;
+      const i = +b.dataset.i;
+      if(i===q.ans) b.classList.add("right");
+      else if(i===val) b.classList.add("wrong");
+    });
+  } else {
+    ok = q.ans.some(a => norm(a) === norm(val));
+    $("shortIn").disabled = true;
+    document.querySelector("#shortForm button").disabled = true;
+  }
+  document.querySelector(".hint")?.remove();
+  S.queue.shift();
+  if(ok){
+    S.correct.push(q.id);
+    S.retry = S.retry.filter(id=>id!==q.id);
+    sfx.ok();
+  } else {
+    S.queue.push(q.id);
+    if(!S.retry.includes(q.id)) S.retry.push(q.id);
+    if(!S.wrongEver.includes(q.id)) S.wrongEver.push(q.id);
+    sfx.no();
+    $("card").classList.remove("shake"); void $("card").offsetWidth; $("card").classList.add("shake");
+  }
+  save();
+  const after = level();
+  const right = q.type==="mc" ? `${q.num?CIRC[q.ans]:(q.ans+1)+"번"} ${q.opts[q.ans]}` : q.ans[0];
+  const last = S.correct.length >= TOTAL;
+  $("fbSlot").innerHTML = `<div class="fb ${ok?'ok':'no'}">
+     <div class="face" aria-hidden="true">${ok?'O':'X'}</div>
+     <div class="txt">
+       <h3>${ok?'딩동댕! 정답이에요':'아쉬워요!'}</h3>
+       ${ok?'':`<p class="ans">정답: ${esc(right)}</p>`}
+       <p class="exp">${esc(q.exp)}</p>
+       ${ok?'':'<p class="again">이 문제는 뒤에서 다시 나와요.</p>'}
+     </div>
+     <button class="go ${ok?'':'sun'}" id="nextBtn" type="button">${last?'완전체 보기':(after>before?'레벨 업!':'다음')}</button>
+   </div>`;
+  renderSide(ok);
+  if(ok) hop();
+  pending = ()=>{
+    pending = null;
+    if(last){ showFinal(true); return; }
+    if(after>before){ showLevelUp(after); return; }
+    renderQuestion();
+  };
+  $("nextBtn").onclick = ()=>pending && pending();
+  $("nextBtn").focus({preventScroll:true});
+}
+
+function playFX(){
+  ["flash","ovHero","zap","ovTag"].forEach(id=>{ const el=$(id); el.classList.remove("go-fx"); void el.offsetWidth; el.classList.add("go-fx"); });
+}
+function confetti(n){
+  const box = $("confetti"); box.innerHTML = "";
+  const colors = ["#ffd93b","#ff6b6b","#3fa2ff","#4fbf4f","#9b7bff","#20bfae"];
+  for(let i=0;i<n;i++){
+    const c = document.createElement("i");
+    c.style.left = (Math.random()*1600)+"px";
+    c.style.background = colors[i%colors.length];
+    c.style.animationDuration = (1.8+Math.random()*1.8)+"s";
+    c.style.animationDelay = (Math.random()*.8)+"s";
+    box.appendChild(c);
+  }
+  setTimeout(()=>{ box.innerHTML=""; }, 4500);
+}
+function showLevelUp(lv){
+  $("ovHero").innerHTML = heroSVG(lv,"ov");
+  $("ovTag").textContent = "레벨 업!";
+  $("ovName").textContent = `Lv.${lv} ${LEVELS[lv].name}`;
+  $("ovDesc").textContent = LEVELS[lv].desc;
+  $("ovBtns").innerHTML = `<button class="go" id="ovGo" type="button">계속 충전하기</button>`;
+  $("overlay").hidden = false;
+  playFX(); confetti(30); sfx.up();
+  $("ovGo").onclick = ()=>{ $("overlay").hidden = true; renderQuestion(); };
+  $("ovGo").focus();
+}
+function showFinal(animate){
+  const firstTry = TOTAL - S.wrongEver.length;
+  $("ovHero").innerHTML = heroSVG(8,"fin");
+  $("ovTag").textContent = "완전체 달성!";
+  $("ovName").textContent = "Lv.8 " + LEVELS[8].name;
+  $("ovDesc").innerHTML = `40문제를 모두 맞혔어요!<br>한 번에 맞힌 문제 <b>${firstTry}</b>개 · 다시 도전해서 맞힌 문제 <b>${S.wrongEver.length}</b>개`;
+  $("ovBtns").innerHTML = `<button class="go" id="ovAgain" type="button">처음부터 다시</button><button class="go sun" id="ovClose" type="button">히어로 구경하기</button>`;
+  $("overlay").hidden = false;
+  if(animate!==false){ playFX(); confetti(90); sfx.win(); }
+  $("ovAgain").onclick = ()=>{ $("overlay").hidden = true; fresh0(); };
+  $("ovClose").onclick = ()=>{ $("overlay").hidden = true; renderDoneCard(); };
+}
+function fresh0(){ const s = fresh(); s.started = true; S = s; save(); renderSide(); renderQuestion(); return s; }
+function renderDoneCard(){
+  $("card").innerHTML = `<div class="intro"><h2><span>번개 히어로</span> 완전체!</h2>
+    <p>‘전기의 이용’ 40문제를 모두 정복했어요. 전기 회로, 도체와 부도체, 전지의 직렬연결, 전자석, 전기를 안전하게 쓰는 방법까지 모두 충전 완료!</p>
+    <div class="btns" style="margin-top:auto"><button class="go" id="again2" type="button">처음부터 다시</button><button class="go sun" id="party" type="button">완전체 다시 보기</button></div></div>`;
+  $("again2").onclick = ()=>fresh0();
+  $("party").onclick = ()=>showFinal(true);
+}
+
+/* ---------- 키보드 ---------- */
+document.addEventListener("keydown", e=>{
+  if(!$("overlay").hidden) return;
+  if(e.target.tagName==="INPUT") return;
+  if(pending && (e.key==="Enter" || e.key===" ")){ e.preventDefault(); pending(); return; }
+  const n = parseInt(e.key,10);
+  if(n>=1 && n<=5){ const b = document.querySelector(`.opt[data-i="${n-1}"]`); if(b && !b.disabled) b.click(); }
+});
+
+$("soundBtn").onclick = ()=>{ sound = !sound; $("soundBtn").textContent = sound?"소리 켬":"소리 끔"; $("soundBtn").setAttribute("aria-pressed", sound); };
+let resetArm = false;
+$("resetBtn").onclick = ()=>{
+  if(!resetArm){ resetArm = true; $("resetBtn").textContent = "한 번 더 누르면 초기화"; setTimeout(()=>{ resetArm=false; $("resetBtn").textContent="처음부터"; },3000); return; }
+  resetArm = false; $("resetBtn").textContent = "처음부터";
+  $("overlay").hidden = true; pending = null;
+  S = fresh(); save(); renderSide(); renderStart();
+};
+
+/* ---------- 시작 ---------- */
+function start(data){
+  S = (data && data.S) || load() || fresh();
+  fit();
+  renderSide();
+  if(S.correct.length >= TOTAL){ renderDoneCard(); }
+  else renderStart();
+}
+window.claude?.hot?.snapshot?.(()=>({S}));
+window.claude?.hot?.ready ? window.claude.hot.ready(start) : start(window.claude?.hot?.data ?? {});
+document.fonts?.ready?.then(fit);
+</script>
